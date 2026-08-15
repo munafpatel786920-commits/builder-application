@@ -1,0 +1,8 @@
+{
+  "name": "Remix   Builder \u0026 Construction Management App",
+  "description": "A comprehensive builder and construction management system tailored for the Indian market, featuring project tracking, materials, clients, worker attendance, GST billing, and an AI construction advisor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

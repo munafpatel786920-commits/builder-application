@@ -1,0 +1,311 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A construction or real-estate development project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "landPurchaseId": { "type": "string" },
+        "location": { "type": "string" },
+        "coords": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "status": { "type": "string", "enum": ["Planning", "Ongoing", "Completed"] },
+        "budget": { "type": "number" },
+        "spent": { "type": "number" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "contractorName": { "type": "string" },
+        "contractorPhone": { "type": "string" },
+        "type": { "type": "string", "enum": ["Residential", "Commercial", "Villa", "Plot"] },
+        "progress": { "type": "number" },
+        "sitePhotos": { "type": "array" },
+        "milestones": { "type": "array" }
+      },
+      "required": ["id", "userId", "name", "location", "status", "budget", "spent", "type"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "A construction client or real-estate buyer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "company": { "type": "string" },
+        "projectHistory": { "type": "array" },
+        "totalAgreed": { "type": "number" },
+        "totalPaid": { "type": "number" },
+        "meetings": { "type": "array" }
+      },
+      "required": ["id", "userId", "name", "phone"]
+    },
+    "Worker": {
+      "title": "Worker",
+      "description": "Worker details and daily attendance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "phone": { "type": "string" },
+        "dailyWage": { "type": "number" },
+        "assignedProjectId": { "type": "string" },
+        "assignedProjectName": { "type": "string" },
+        "completedTasks": { "type": "number" },
+        "totalAttendance": { "type": "number" },
+        "attendance": { "type": "object" }
+      },
+      "required": ["id", "userId", "name", "role", "dailyWage"]
+    },
+    "Material": {
+      "title": "Material Inventory Item",
+      "description": "Materials kept in stock",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "stock": { "type": "number" },
+        "unit": { "type": "string" },
+        "minimumStock": { "type": "number" },
+        "vendor": { "type": "string" },
+        "vendorPhone": { "type": "string" },
+        "lastUpdated": { "type": "string" },
+        "pricePerUnit": { "type": "number" }
+      },
+      "required": ["id", "userId", "name", "stock", "unit", "minimumStock"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "GST compliance invoices",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientId": { "type": "string" },
+        "projectName": { "type": "string" },
+        "amount": { "type": "number" },
+        "cgst": { "type": "number" },
+        "sgst": { "type": "number" },
+        "gstNumber": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["Paid", "Pending", "Overdue"] },
+        "dueDate": { "type": "string", "format": "date" },
+        "createdAt": { "type": "string", "format": "date" }
+      },
+      "required": ["id", "userId", "invoiceNumber", "clientName", "amount", "totalAmount", "status"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Enquiries for booking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "propertyType": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "FollowUp", "Converted", "Closed"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "name", "phone", "status"]
+    },
+    "LandPurchase": {
+      "title": "Land Purchase",
+      "description": "Zameen purchase deals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "sizeSqYds": { "type": "number" },
+        "costLakhs": { "type": "number" },
+        "purchaseDate": { "type": "string", "format": "date" },
+        "sellerName": { "type": "string" },
+        "documentStatus": { "type": "string", "enum": ["Pending", "Registered", "Clear Title"] },
+        "courtDeedLinked": { "type": "boolean" },
+        "assignedBuildingName": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "location", "costLakhs"]
+    },
+    "Property": {
+      "title": "Property",
+      "description": "Releasing of flats/units",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "flatNumber": { "type": "string" },
+        "location": { "type": "string" },
+        "type": { "type": "string", "enum": ["Residential", "Premium Villa", "Plot", "Retail Shop"] },
+        "price": { "type": "string" },
+        "priceLakhs": { "type": "number" },
+        "size": { "type": "string" },
+        "bedroomCount": { "type": "number" },
+        "amenities": { "type": "array" },
+        "status": { "type": "string", "enum": ["Available", "Booked", "Sold Out"] },
+        "buyerName": { "type": "string" },
+        "buyerPhone": { "type": "string" },
+        "buyerAddress": { "type": "string" },
+        "amountReceived": { "type": "number" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "flatNumber", "status"]
+    },
+    "OfficeExpense": {
+      "title": "Office Expense",
+      "description": "Daily petty expenses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "paidTo": { "type": "string" },
+        "approvedBy": { "type": "string" },
+        "description": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "receiptAttached": { "type": "boolean" }
+      },
+      "required": ["id", "userId", "date", "category", "amount"]
+    },
+    "ActivityLog": {
+      "title": "Activity Log",
+      "description": "Action logging tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "user": { "type": "string" },
+        "role": { "type": "string" },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "details": { "type": "string" }
+      },
+      "required": ["id", "userId", "user", "action", "timestamp"]
+    },
+    "CompanyProfile": {
+      "title": "Company Profile Settings",
+      "description": "Active builder company settings profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "companyName": { "type": "string" },
+        "address": { "type": "string" },
+        "directorName": { "type": "string" },
+        "state": { "type": "string" },
+        "city": { "type": "string" },
+        "phoneNo": { "type": "string" },
+        "gstNo": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "pettyCashFund": { "type": "number" }
+      },
+      "required": ["id", "userId", "companyName", "directorName"]
+    },
+    "SaaSConfig": {
+      "title": "SaaS Config",
+      "description": "Global SaaS system parameters and Super Admin info",
+      "type": "object",
+      "properties": {
+        "superAdminUid": { "type": "string" },
+        "superAdminEmail": { "type": "string" },
+        "superAdminName": { "type": "string" },
+        "globalNotice": { "type": "string" },
+        "proPrice": { "type": "number" },
+        "supervisorPrice": { "type": "number" },
+        "enterprisePrice": { "type": "number" },
+        "lastUpdatedBy": { "type": "string" }
+      },
+      "required": ["superAdminUid", "superAdminEmail", "superAdminName", "proPrice", "supervisorPrice", "enterprisePrice"]
+    },
+    "ApprovedCustomer": {
+      "title": "Approved Customer License",
+      "description": "Indicates registered builder/buyer with active license and login credentials",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "password": { "type": "string" },
+        "plan": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "isApprovedCustomer": { "type": "boolean" }
+      },
+      "required": ["name", "email", "password", "plan", "createdAt", "isApprovedCustomer"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "List of construction projects"
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Construction clients"
+    },
+    "/workers/{workerId}": {
+      "schema": "Worker",
+      "description": "Workers and subcontractors roster"
+    },
+    "/materials/{materialId}": {
+      "schema": "Material",
+      "description": "Material inventory"
+    },
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "GST Invoices"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Customer enquiries"
+    },
+    "/lands/{landId}": {
+      "schema": "LandPurchase",
+      "description": "Purchase records for lands/plots"
+    },
+    "/properties/{propertyId}": {
+      "schema": "Property",
+      "description": "Available properties, flats, houses"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "OfficeExpense",
+      "description": "Office and Chai expense records"
+    },
+    "/activityLogs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Corporate operations audit logs"
+    },
+    "/profile/{profileId}": {
+      "schema": "CompanyProfile",
+      "description": "Company profile details and settings mapping to uid"
+    },
+    "/saas_config/{configId}": {
+      "schema": "SaaSConfig",
+      "description": "System-wide parameters"
+    },
+    "/approved_customers/{emailId}": {
+      "schema": "ApprovedCustomer",
+      "description": "Whitelisted subscriber licenses"
+    }
+  }
+}

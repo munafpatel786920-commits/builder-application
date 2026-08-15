@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", var(--font-sans), sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@media print {
+  /* Fix print clipping by removing overflow constraints from layout wrappers */
+  html, body, #root {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Let parents of the printable layout pass through the visible boundaries */
+  .overflow-hidden, .overflow-y-auto, .h-screen, .min-h-screen, .flex-1, .custom-scrollbar, #tab-module-content, .lg\\:col-span-8, .lg\\:col-span-9, .grid, .grid-cols-1, .lg\\:grid-cols-12, main {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+  }
+  
+  /* Show only the printable agreement and its children */
+  #printable-agreement, #printable-agreement * {
+    visibility: visible;
+  }
+  
+  /* Position the printable agreement to the top of the physical page */
+  #printable-agreement {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10mm;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* Print optimizations for printable inputs */
+  #printable-agreement input {
+    border: none !important;
+    border-bottom: 1px dotted #94a3b8 !important;
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
