@@ -143,16 +143,6 @@ export default function SaaSPage({
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {handleSuperAdminInstantLogin && (
-              <button
-                type="button"
-                onClick={handleSuperAdminInstantLogin}
-                className="bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-wider uppercase transition active:scale-95 cursor-pointer shadow-md flex items-center gap-1.5"
-              >
-                <span>👑</span>
-                <span>Super Admin</span>
-              </button>
-            )}
             <button
               onClick={openAdminLogin}
               className="bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-600/20 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black tracking-widest uppercase transition active:scale-95 cursor-pointer shadow-md"
