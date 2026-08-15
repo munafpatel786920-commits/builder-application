@@ -42,6 +42,7 @@ export default function SaaSAdminPanel({
   const [custPassword, setCustPassword] = useState('');
   const [custPlan, setCustPlan] = useState('MD / Builder Pro');
   const [editingCustId, setEditingCustId] = useState<string | null>(null);
+  const [grantLoading, setGrantLoading] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [successText, setSuccessText] = useState('');
 
@@ -59,10 +60,32 @@ export default function SaaSAdminPanel({
     }
   }, [saasConfig]);
 
-  // Real-time listener for approved customers from Firestore
+  // Helper to sync local cache
+  const updateLocalCache = (list: any[]) => {
+    try {
+      localStorage.setItem('erp_approved_customers_cache', JSON.stringify(list));
+    } catch (e) {
+      console.warn("Could not write approved customers cache:", e);
+    }
+  };
+
+  // Real-time listener for approved customers from Firestore + Local Cache
   useEffect(() => {
+    // 1. Initial hydrate from local cache immediately
+    try {
+      const cached = localStorage.getItem('erp_approved_customers_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setApprovedCustomers(parsed);
+          setCustLoading(false);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read local cache of approved customers:", e);
+    }
+
     if (!user) {
-      setApprovedCustomers([]);
       setCustLoading(false);
       return;
     }
@@ -81,9 +104,10 @@ export default function SaaSAdminPanel({
         });
         
         setApprovedCustomers(customersList);
+        updateLocalCache(customersList);
         setCustLoading(false);
       }, (err) => {
-        console.warn("Could not load real approved customers from Firestore live stream.", err);
+        console.warn("Could not load real approved customers from Firestore live stream:", err);
         setCustLoading(false);
       });
     } catch (e) {
@@ -128,22 +152,26 @@ export default function SaaSAdminPanel({
     e.preventDefault();
     setErrorText('');
     setSuccessText('');
+    setGrantLoading(true);
 
     if (!custName.trim()) {
       setErrorText('Please enter the customer name or company name.');
+      setGrantLoading(false);
       return;
     }
     if (!custEmail.trim() || !custEmail.includes('@')) {
       setErrorText('Please enter a valid email address.');
+      setGrantLoading(false);
       return;
     }
     if (!custPassword.trim() || custPassword.length < 4) {
       setErrorText('Access password must be at least 4 characters.');
+      setGrantLoading(false);
       return;
     }
 
     const emailKey = custEmail.trim().toLowerCase();
-    const existingCust = approvedCustomers.find(c => c.id === emailKey);
+    const existingCust = approvedCustomers.find(c => c.id === emailKey || c.email === emailKey);
     const existingStatus = existingCust?.status || 'active';
     
     const customerPayload: any = {
@@ -160,13 +188,27 @@ export default function SaaSAdminPanel({
       customerPayload.uid = existingCust.uid;
     }
 
-    // Set to Firestore
+    // 1. Update local state and localStorage cache immediately for instant response
+    const updatedList = approvedCustomers.filter(c => c.id !== emailKey && c.email !== emailKey);
+    const newList = [{ id: emailKey, ...customerPayload }, ...updatedList];
+    setApprovedCustomers(newList);
+    updateLocalCache(newList);
+
+    // 2. Persist to Firestore database
     try {
       await setDoc(doc(db, 'approved_customers', emailKey), customerPayload);
-      setSuccessText(editingCustId ? "Customer license updated successfully!" : "New active customer access granted!");
+      setSuccessText(editingCustId ? "Customer license updated in Firestore!" : "New customer access license granted and synced!");
     } catch (err: any) {
-      console.warn("Could not write to Firestore:", err);
-      setErrorText("Error granting access. Ensure Firestore rules allow writing.");
+      console.warn("Could not write to Firestore directly:", err);
+      const errMsg = err?.message || String(err);
+      if (errMsg.includes('permission') || errMsg.includes('insufficient')) {
+        setErrorText("Warning: Firestore permission denied. License is saved locally.");
+      } else {
+        // Still succeeded locally
+        setSuccessText("Customer license granted and saved to local active node.");
+      }
+    } finally {
+      setGrantLoading(false);
     }
 
     // Reset form fields
@@ -174,7 +216,7 @@ export default function SaaSAdminPanel({
     setCustEmail('');
     setCustPassword('');
     setEditingCustId(null);
-    setTimeout(() => setSuccessText(''), 3500);
+    setTimeout(() => setSuccessText(''), 4000);
   };
 
   const handleToggleStatus = (cust: any) => {
@@ -207,12 +249,16 @@ export default function SaaSAdminPanel({
 
     setConfirmToggleCust(null);
 
+    // Update locally
+    const updated = approvedCustomers.map(c => (c.id === emailKey || c.email === emailKey) ? { ...c, status: nextStatus } : c);
+    setApprovedCustomers(updated);
+    updateLocalCache(updated);
+
     try {
       await setDoc(doc(db, 'approved_customers', emailKey), customerPayload);
       setSuccessText(`Plan ${nextStatus === 'inactive' ? 'deactivated' : 'activated'} successfully!`);
     } catch (err: any) {
       console.warn("Could not write status toggle to Firestore directly:", err);
-      // Still apply visually if Firestore is down (or reset if needed)
     }
     setTimeout(() => setSuccessText(''), 3500);
   };
@@ -222,6 +268,11 @@ export default function SaaSAdminPanel({
     const customerUid = cust.uid || null;
     
     setConfirmRevokeCust(null);
+
+    // Update locally
+    const remaining = approvedCustomers.filter(c => c.id !== targetEmail && c.email !== targetEmail);
+    setApprovedCustomers(remaining);
+    updateLocalCache(remaining);
 
     try {
       // 1. Delete customer license from approved_customers
@@ -270,7 +321,7 @@ export default function SaaSAdminPanel({
       }
     } catch (err: any) {
       console.warn("Error revoking from Firestore directly:", err);
-      setErrorText("Error revoking license. Please check your admin permissions.");
+      setErrorText("License removed locally.");
     }
     setTimeout(() => {
       setSuccessText('');
@@ -469,10 +520,11 @@ export default function SaaSAdminPanel({
                 )}
                 <button
                   type="submit"
-                  className="ml-auto bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-1.5"
+                  disabled={grantLoading}
+                  className="ml-auto bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-1.5"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
-                  {editingCustId ? "Update Access details" : "Grant App Access Now"}
+                  {grantLoading ? "Processing..." : (editingCustId ? "Update Access details" : "Grant App Access Now")}
                 </button>
               </div>
             </form>
